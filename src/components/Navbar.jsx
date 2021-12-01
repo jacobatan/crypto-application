@@ -24,9 +24,9 @@ const Navbar = () => {
           }}
         />
         <Typography.Title level={2} className="logo">
-          <Link to="/">JTCrypto</Link>
+          <Link to="/">Crypto</Link>
         </Typography.Title>
-        {/* <Button className="menu-control-container"></Button> */}
+        <Button className="menu-control-container"></Button>
       </div>
       <Menu theme="dark">
         <Menu.Item icon={<HomeOutlined />}>

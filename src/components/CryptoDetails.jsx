@@ -14,21 +14,28 @@ import {
   NumberOutlined,
   ThunderboltOutlined,
 } from "@ant-design/icons";
-
-import { useGetCryptoDetailsQuery } from "../services/cryptoApi";
+import {
+  useGetCryptoDetailsQuery,
+  useGetCryptoHistoryQuery,
+} from "../services/cryptoApi";
+import LineChart from "./LineChart";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
-const CryptoDetails = () => {
+function CryptoDetails() {
   const { coinId } = useParams();
   const [timePeriod, setTimePeriod] = useState("7d");
   const { data, isFetching } = useGetCryptoDetailsQuery(coinId);
-  const time = ["3h", "24h", "7d", "30d", "1y", "3m", "3y", "5y"];
-  if (isFetching) return "Loading...";
-
+  const { data: coinHistory } = useGetCryptoHistoryQuery({
+    coinId,
+    timePeriod,
+  });
   const cryptoDetails = data?.data?.coin;
-  console.log(cryptoDetails);
+
+  if (isFetching) return "<Loader />";
+
+  const time = ["3h", "24h", "7d", "30d", "1y", "3m", "3y", "5y"];
 
   const stats = [
     {
@@ -85,6 +92,7 @@ const CryptoDetails = () => {
       icon: <ExclamationCircleOutlined />,
     },
   ];
+
   return (
     <Col className="coin-detail-container">
       <Col className="coin-heading-container">
@@ -106,6 +114,11 @@ const CryptoDetails = () => {
           <Option key={date}>{date}</Option>
         ))}
       </Select>
+      <LineChart
+        coinHistory={coinHistory}
+        currentPrice={millify(cryptoDetails.price)}
+        coinName={cryptoDetails.name}
+      />
       <Col className="stats-container">
         <Col className="coin-value-statistics">
           <Col className="coin-value-statistics-heading">
@@ -127,7 +140,7 @@ const CryptoDetails = () => {
         <Col className="other-stats-info">
           <Col className="coin-value-statistics-heading">
             <Title level={3} className="coin-details-heading">
-              Oher Statistics
+              Other Statistics
             </Title>
             <p>An overview showing the stats of all cryptocurrencies</p>
           </Col>
@@ -142,8 +155,31 @@ const CryptoDetails = () => {
           ))}
         </Col>
       </Col>
+      <Col className="coin-desc-link">
+        <Row className="coin-desc">
+          <Title level={3} className="coin-details-heading">
+            What is {cryptoDetails.name}
+            {HTMLReactParser(cryptoDetails.description)}
+          </Title>
+        </Row>
+        <Col className="coin-links">
+          <Title level={3} className="coin-details-heading">
+            {cryptoDetails.name} Links
+          </Title>
+          {cryptoDetails.links.map((link) => (
+            <Row className="coin-link" key={link.name}>
+              <Title level={5} className="link-name">
+                {link.type}
+              </Title>
+              <a href={link.url} target="_blank" rel="noreferrer">
+                {link.name}
+              </a>
+            </Row>
+          ))}
+        </Col>
+      </Col>
     </Col>
   );
-};
+}
 
 export default CryptoDetails;
